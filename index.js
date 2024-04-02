@@ -7,38 +7,55 @@ app.use(express.json())
 
 const sequelize = new Sequelize(process.env.DATABASE_URL)
 
-class Note extends Model { }
-Note.init({
+class Blog extends Model { }
+Blog.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    content: {
+    author: {
+        type: DataTypes.TEXT
+    },
+    title: {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    important: {
-        type: DataTypes.BOOLEAN,
+    url: {
+        type: DataTypes.TEXT,
+        allowNull: false
     },
-    date: {
-        type: DataTypes.DATE
+    likes: {
+        type: DataTypes.INTEGER,
     }
 }, {
     sequelize,
     underscored: true,
     timestamps: false,
-    modelName: 'note'
+    modelName: 'blog'
 })
 
-app.get('/api/notes', async (req, res) => {
-    const notes = await Note.findAll()
-    res.json(notes)
+app.get('/api/blogs', async (req, res) => {
+    const blogs = await Blog.findAll()
+    res.json(blogs)
 })
-app.post('/api/notes', async (req, res) => {
+app.post('/api/blogs', async (req, res) => {
     try {
-        const note = await Note.create(req.body)
-        res.json(note)
+        const blog = await Blog.create(req.body)
+        res.json(blog)
+    } catch (error) {
+        return res.status(400).json({ error })
+    }
+})
+app.delete('/api/blogs/:id', async (req, res) => {
+    try {
+        const blog = await Blog.findByPk(req.params.id)
+        if (blog) {
+            await blog.destroy()
+            return res.json({ success: true, message: "Blog deleted" })
+        } else {
+            return res.json({ success: false, error: 'blog not found' })
+        }
     } catch (error) {
         return res.status(400).json({ error })
     }
