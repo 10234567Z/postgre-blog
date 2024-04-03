@@ -1,5 +1,5 @@
 const router = require('express').Router()
-
+require('express-async-errors');
 const { Blog } = require('../models')
 
 const blogFinder = async (req, res, next) => {
@@ -17,12 +17,13 @@ router.get('/', async (req, res) => {
     res.json(blogs)
 })
 router.post('/', async (req, res) => {
-    try {
-        const blog = await Blog.create(req.body)
-        res.json(blog)
-    } catch (error) {
-        return res.status(400).json({ error })
-    }
+    const blog = await Blog.create(req.body)
+    res.json(blog)
+})
+router.put('/:id', blogFinder, async (req, res) => {
+    req.blog.likes += 1;
+    await req.blog.save()
+    res.json({ likes: req.blog.likes })
 })
 router.delete('/:id', blogFinder, async (req, res) => {
     await req.blog.destroy()
